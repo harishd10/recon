@@ -89,7 +89,7 @@ See the javadoc for more details regarding the Loader interface.
 In case of any errors
 ---------------------
 1. If you get a OutOfMemory (java heap) exception, try increasing the memory allocated to the jvm in the run.sh file (there is a -Xmx parameter) and run again.
-2. Any other error/exception, kindly let me (harishd@nyu.edu) know of the error. It would be great if you can provide
+2. Any other error/exception, kindly let me know of the error. It would be great if you can provide
    the stack trace of the exception (if it is an exception that has occured) along with the input data.
 
 
