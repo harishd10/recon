@@ -20,7 +20,7 @@ This folder contains the following files / folders:
 
 Requirements
 ------------
-This program requires **Java 1.5** or higher
+This program requires **Java 1.5** or higher.
 To compile this code using the given build.xml Apache Ant is required. (tested on Apache Ant 1.8.0)
 
 Compiling the code
