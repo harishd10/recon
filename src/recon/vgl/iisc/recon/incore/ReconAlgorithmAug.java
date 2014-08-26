@@ -146,6 +146,11 @@ public class ReconAlgorithmAug {
 		nextSet = new int[data.noVertices + noTris + noTris];
 		prevSet = new int[data.noVertices + noTris + noTris];
 		
+		for(int i = 0;i < nextSet.length;i ++) {
+			nextSet[i] = -1;
+			prevSet[i] = -1;
+		}
+		
 		comps = new Component[maxStar];
 		compNos = new int[maxStar];
 		cps = new CriticalPoint[data.noVertices];
