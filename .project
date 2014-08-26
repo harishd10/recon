@@ -14,11 +14,4 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>rgutils</name>
-			<type>2</type>
-			<location>/Users/harishd/Desktop/Projects/Reebgraph/code/recon/src/rgutils</location>
-		</link>
-	</linkedResources>
 </projectDescription>
