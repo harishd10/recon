@@ -3,7 +3,8 @@ Recon - A fast algorithm to compute Reeb graphs
 
 Recon is a library to compute Reeb graphs. It implements the algorithm outlined in the paper 
 "Computing Reeb Graphs as a Union of Contour Trees" 
-by Harish Doraiswamy and Vijay Natarajan.
+Harish Doraiswamy and Vijay Natarajan
+IEEE Transactions on Visualization and Computer Graphics, 19(2), 2013, 249--262.
 
 Recon is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
