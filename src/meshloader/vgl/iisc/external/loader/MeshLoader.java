@@ -71,4 +71,5 @@ public interface MeshLoader {
 
 	public int getSimplexCount(); 
 	
+	public int [] getVertexMap();
 }

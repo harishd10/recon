@@ -119,7 +119,7 @@ public class ReebGraphData {
 		}
 	}
 
-	byte getType(String type) {
+	public byte getType(String type) {
 		if(MINIMUM_STRING.equalsIgnoreCase(type)) {
 			return MINIMUM;
 		}
@@ -130,5 +130,18 @@ public class ReebGraphData {
 			return SADDLE;
 		}
 		return REGULAR;
+	}
+	
+	public String getTypeString(byte type) {
+		if(MINIMUM == type) {
+			return MINIMUM_STRING;
+		}
+		if(MAXIMUM == type) {
+			return MAXIMUM_STRING;
+		}
+		if(SADDLE == type) {
+			return SADDLE_STRING;
+		}
+		return "None";
 	}
 }

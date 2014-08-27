@@ -182,4 +182,9 @@ public class OffLoader implements MeshLoader {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public int[] getVertexMap() {
+		return null;
+	}
 }

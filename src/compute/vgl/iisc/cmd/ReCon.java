@@ -26,14 +26,18 @@
 package vgl.iisc.cmd;
 
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Properties;
 
 import vgl.iisc.external.loader.DataLoader;
 import vgl.iisc.external.loader.MeshLoader;
 import vgl.iisc.recon.incore.*;
+import vgl.iisc.reebgraph.ui.ReebGraphData;
 import vgl.iisc.utils.Utilities;
 
 public class ReCon {
@@ -82,10 +86,18 @@ public class ReCon {
 				rg.useAdjacencies(adj);
 				rg.computeReebGraph(loader, fn);
 				if(op != null) {
+					int []vmap = loader.getVertexMap();
 					if(pFile != null) {
 						rg.output(op, pFile);
+						if(vmap!= null) {
+							rewriteRG(op,vmap);
+							rewritePart(pFile,vmap);
+						}
 					} else {
 						rg.output(op);
+						if(vmap!= null) {
+							rewriteRG(op,vmap);
+						}
 					}
 				}
 			} else {
@@ -93,7 +105,11 @@ public class ReCon {
 				rg.useAdjacencies(adj);
 				rg.computeReebGraph(loader, fn);
 				if(op != null) {
+					int []vmap = loader.getVertexMap();
 					rg.output(op);
+					if(vmap!= null) {
+						rewriteRG(op,vmap);
+					}
 				}
 			}
 			long en = System.nanoTime();
@@ -104,6 +120,62 @@ public class ReCon {
 			e1.printStackTrace();
 		} catch (IOException e1) {
 			e1.printStackTrace();
+		}
+	}
+
+	private static void rewritePart(String pFile, int[] vmap) {
+		if(vmap == null) {
+			return;
+		}
+		int [] invmap = new int[vmap.length];
+		int valid = 0;
+		for(int i = 0;i < vmap.length;i ++) {
+			if(vmap[i] == -1) {
+				continue;
+			}
+			invmap[vmap[i]] = i;
+			valid = Math.max(valid, vmap[i]);
+		}
+		valid ++;
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(pFile));
+			int nv = Integer.parseInt(reader.readLine());
+			int [] part = new int[nv];
+			for(int i = 0;i < nv;i ++) {
+				part[i] = Integer.parseInt(reader.readLine());
+			}
+			reader.close();
+			PrintStream p = new PrintStream(pFile);
+			p.println(valid);
+			for(int i = 0;i < valid;i ++) {
+				p.println(part[invmap[i]]);
+			}
+			p.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void rewriteRG(String op, int[] vmap) {
+		if(vmap == null) {
+			return;
+		}
+		try {
+			ReebGraphData rg = new ReebGraphData(op);
+			PrintStream p = new PrintStream(op);
+			p.println(rg.noNodes + " " + rg.noArcs);
+			for(int i = 0;i < rg.noNodes;i ++) {
+				int v = vmap[rg.nodes[i].v];
+				p.println(v + " " + rg.nodes[i].fn + " " + rg.getTypeString(rg.nodes[i].type));
+			}
+			
+			for(int i = 0;i < rg.noArcs;i ++) {
+				p.print(rg.arcs[i].from + " " + rg.arcs[i].to + " ");
+				p.println();
+			}
+			p.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

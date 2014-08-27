@@ -28,6 +28,9 @@ package vgl.iisc.external.loader.impl;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.StringTokenizer;
 
 import vgl.iisc.external.loader.MeshLoader;
@@ -52,6 +55,16 @@ import vgl.iisc.external.types.Vertex;
  * 
  */
 public class SimLoader implements MeshLoader {
+	
+	class TmpVertex {
+		Vertex v;
+		int index;
+	}
+	
+	class TmpSimplex {
+		int [] v;
+	}
+	
 	private BufferedReader reader;
 	private int noVertices;
 	private int noSims;
@@ -59,7 +72,13 @@ public class SimLoader implements MeshLoader {
 	private int curSim;
 	private int dim;
 	private String mesh;
+
 	private ArrayList<Triangle> tris = new ArrayList<Triangle>();
+	private ArrayList<TmpVertex> verts = new ArrayList<TmpVertex>();
+	private ArrayList<TmpVertex> sortVerts = new ArrayList<TmpVertex>();
+	private ArrayList<TmpSimplex> sims = new ArrayList<TmpSimplex>();
+	
+	private int [] vMap;
 	
 	@Override
 	public void setInputFile(String inputMesh) {
@@ -78,29 +97,11 @@ public class SimLoader implements MeshLoader {
 
 			curVertex = 0;
 			curSim = 0;
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-	}
-
-	@Override
-	public int getVertexCount() {
-		return noVertices;
-	}
-
-	@Override
-	public int getSimplexCount() {
-		return noSims;
-	}
-
-	@Override
-	public Simplex getNextSimplex() {
-		try {
-			if (curVertex < noVertices) {
+			
+			for(int n = 0;n < noVertices;n ++) {
 				float fn;
-				String s = reader.readLine();
-				String[] r = splitString(s);
+				s = reader.readLine();
+				r = splitString(s);
 				if(r.length < dim) {
 					System.out.println("Invalid d-dimensional point");
 					System.exit(0);
@@ -117,20 +118,99 @@ public class SimLoader implements MeshLoader {
 				}
 				vertex.f = fn;
 
-				curVertex++;
-				return vertex;
+				TmpVertex tv = new TmpVertex();
+				tv.v = vertex;
+				tv.index = n;
+				verts.add(tv);
 			}
-			if(!tris.isEmpty()) {
-				 return tris.remove(0);
-			}
-			if (curSim < noSims) {
-				String s = reader.readLine();
-				String[] r = splitString(s);
+			
+			for(int n = 0;n < noSims;n ++) {
+				s = reader.readLine();
+				r = splitString(s);
 				int l = Integer.parseInt(r[0]); 
 				int [] v = new int [l];
 				
 				for(int i = 0;i < l;i ++) {
 					v[i] = Integer.parseInt(r[i+1].trim());
+				}
+				TmpSimplex sim = new TmpSimplex();
+				if(v.length > 2) {
+					sim.v = v;
+				} else if (v.length == 2) {
+					int [] vv = new int[3];
+					TmpVertex tv = new TmpVertex();
+					TmpVertex tv1 = verts.get(v[0]);
+					TmpVertex tv2 = verts.get(v[1]);
+					if(tv2.index > tv2.index) {
+						TmpVertex tmp = tv2;
+						tv2 = tv1;
+						tv1 = tmp;
+					}
+					tv.v = new Vertex();
+					tv.v.c = new float[tv1.v.c.length];
+					for(int d = 0;d < tv1.v.c.length; d ++) {
+						tv.v.c[d] = (tv1.v.c[d] + tv2.v.c[d]) / 2;
+					}
+					tv.v.f = (tv1.v.f + tv2.v.f) / 2;
+					tv.index = tv2.index;
+					tv2.index = verts.size();
+					verts.add(tv);
+					vv[0] = v[0];
+					vv[1] = v[1];
+					vv[2] = verts.size() - 1;
+					sim.v = vv;
+				} else {
+					System.out.println("Invalid simplex");
+					System.exit(0);
+				}
+				sims.add(sim);
+			}
+			sortVerts.addAll(verts);
+			Collections.sort(sortVerts, new Comparator<TmpVertex>() {
+
+				@Override
+				public int compare(TmpVertex o1, TmpVertex o2) {
+					return o1.index - o2.index;
+				}
+			});
+			vMap = new int[sortVerts.size()];
+			Arrays.fill(vMap, -1);
+			for(int i = 0;i < noVertices;i ++) {
+				vMap[verts.get(i).index] = i;
+			}
+			noVertices = sortVerts.size();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+
+	@Override
+	public int getVertexCount() {
+		return verts.size();
+	}
+
+	@Override
+	public int getSimplexCount() {
+		return noSims;
+	}
+
+	@Override
+	public Simplex getNextSimplex() {
+		try {
+			if (curVertex < noVertices) {
+				return sortVerts.get(curVertex ++).v;
+			}
+			if(!tris.isEmpty()) {
+				 return tris.remove(0);
+			}
+			if (curSim < noSims) {
+				TmpSimplex sim = sims.get(curSim);
+				int l = sim.v.length;
+				int [] v = new int [l];
+				
+				for(int i = 0;i < l;i ++) {
+					v[i] = verts.get(sim.v[i]).index;
 				}
 				tris.clear();
 				generateTris(v, -1, -1);
@@ -184,6 +264,11 @@ public class SimLoader implements MeshLoader {
 			e.printStackTrace();
 		}
 		
+	}
+
+	@Override
+	public int[] getVertexMap() {
+		return vMap;
 	}
 
 }

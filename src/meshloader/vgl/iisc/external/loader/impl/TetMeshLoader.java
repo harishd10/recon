@@ -168,4 +168,10 @@ public class TetMeshLoader implements MeshLoader {
 		}
 		
 	}
+	
+	@Override
+	public int[] getVertexMap() {
+		return null;
+	}
+
 }
